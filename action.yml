@@ -1,11 +1,20 @@
-name: 'Your name here'
-description: 'Provide a description here'
-author: 'Your name or organization here'
+name: 'wiki-deploy'
+description: 'Action to deploy scripts to Wikimedia sites'
+author: 'Siddharth VP'
 inputs:
-  milliseconds: # change this
+  apiUrl:
     required: true
-    description: 'input description here'
-    default: 'default value if applicable'
+    description: 'API URL of the wiki, eg. https://en.wikipedia.org/w/api.php'
+  username:
+    description: 'Username for use with BotPassword authentication'
+  password:
+    description: 'Password for use with BotPassword authentication'
+  oauth2Token:
+    description: 'Access token for use with OAuth2 authentication'
+  paths:
+    description: 'Paths to sync with wiki pages. Can be multiple lines. Each line should be path-to-file-in-repo <space> wiki-page-title. Note the local file path must not contain spaces.'
+  editSummary:
+    description: 'Edit summary to use while updating pages'
 runs:
   using: 'node16'
   main: 'dist/index.js'

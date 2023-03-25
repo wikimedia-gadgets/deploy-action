@@ -1,9 +1,9 @@
 name: 'build-test'
-on: # rebuild any PRs and main branch changes
-  pull_request:
+on:
   push:
     branches:
       - main
+      - develop
       - 'releases/*'
 
 jobs:
@@ -21,4 +21,6 @@ jobs:
       - uses: actions/checkout@v2
       - uses: ./
         with:
-          milliseconds: 1000
+          paths: '__tests__/sample-script.js User:SDZeroBot/deploy-test.js'
+          apiUrl: 'https://test.wikipedia.org/w/api.php'
+          oauth2Token: ${{ secrets.OAUTH2_TOKEN }}
