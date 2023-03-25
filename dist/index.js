@@ -49,8 +49,7 @@ async function run() {
         }
         const context = github.context;
         const paths = await processPaths(core.getMultilineInput('paths'));
-        const editSummary = core.getInput('editSummary') ||
-            `Updating from repo at ${context.ref}`;
+        const editSummary = core.getInput('editSummary') || `Updating from repo at ${context.ref}`;
         const baseRequestParams = { apiUrl, username, password, OAuth2AccessToken };
         await Promise.all(requestEdits(baseRequestParams, paths, editSummary));
     }
@@ -96,12 +95,12 @@ function requestEdits(baseParams, paths, editSummary) {
         const response = await (0, node_fetch_1.default)(`${HOST}/savepage`, {
             method: 'POST',
             headers: {
-                "Content-Type": "multipart/form-data"
+                'Content-Type': 'multipart/form-data'
             },
             body: formData
         });
         // 3xx-5xx responses are not thrown
-        const result = await response.json();
+        const result = (await response.json());
         if (result.error) {
             core.error(`Failed to update ${wikiPage}: ${result.error}`);
             core.setFailed('Failed to update one or more pages');
