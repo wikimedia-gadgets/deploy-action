@@ -41,16 +41,16 @@ async function run() {
         const apiUrl = core.getInput('apiUrl', { required: true });
         const username = core.getInput('username');
         const password = core.getInput('password');
-        const OAuth2AccessToken = core.getInput('oauth2Token');
+        const oauth2Token = core.getInput('oauth2Token');
         const usingBotPassword = !!username && !!password;
-        const usingOAuth = !!OAuth2AccessToken;
+        const usingOAuth = !!oauth2Token;
         if (!usingBotPassword && !usingOAuth) {
             core.error('No authentication credentials specified. Please specify either OAuth (oauth2AccessToken) or the BotPassword (username and password) credentials.');
         }
         const context = github.context;
         const paths = await processPaths(core.getMultilineInput('paths'));
         const editSummary = core.getInput('editSummary') || `Updating from repo at ${context.ref}`;
-        const baseRequestParams = { apiUrl, username, password, OAuth2AccessToken };
+        const baseRequestParams = { apiUrl, username, password, oauth2Token };
         await requestEdits(baseRequestParams, paths, editSummary);
     }
     catch (error) {
