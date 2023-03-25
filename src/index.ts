@@ -29,7 +29,7 @@ export async function run(): Promise<void> {
 
     const baseRequestParams = {apiUrl, username, password, OAuth2AccessToken}
 
-    await Promise.all(requestEdits(baseRequestParams, paths, editSummary))
+    await requestEdits(baseRequestParams, paths, editSummary)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
@@ -63,37 +63,45 @@ export function requestEdits(
   paths: Array<[string, string]>,
   editSummary: string
 ) {
-  return paths.map(async path => {
-    let [sourceFile, wikiPage] = path
-    let requestParams = {
-      ...baseParams,
-      page: wikiPage,
-      // XXX: should we stream this instead, or send the file directly?
-      content: (await fs.readFile(sourceFile)).toString(),
-      editSummary
-    }
-    const formData = new FormData()
-    for (let [key, val] of Object.entries(requestParams)) {
-      formData.append(key, val)
-    }
-    const response = await fetch(`${HOST}/savepage`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'multipart/form-data'
-      },
-      body: formData
-    })
-    // 3xx-5xx responses are not thrown
-    const result = (await response.json()) as {edit?: string; error?: string}
-    if (result.error) {
-      core.error(`Failed to update ${wikiPage}: ${result.error}`)
-      core.setFailed('Failed to update one or more pages')
-    } else {
-      if (result.edit === 'successful') {
-        core.info(`Successfully edited ${wikiPage}`)
-      } else {
-        core.info(`No change from edit to ${wikiPage}`)
+  return Promise.all(
+    paths.map(async path => {
+      let [sourceFile, wikiPage] = path
+      let requestParams = {
+        ...baseParams,
+        page: wikiPage,
+        // XXX: should we stream this instead, or send the file directly?
+        content: (await fs.readFile(sourceFile)).toString(),
+        editSummary
       }
-    }
-  })
+      const formData = new FormData()
+      for (let [key, val] of Object.entries(requestParams)) {
+        formData.append(key, val)
+      }
+      core.info(`Syncing ${sourceFile} with ${wikiPage}`)
+      try {
+        const response = await fetch(`${HOST}/savepage`, {
+          method: 'POST',
+          body: formData
+        })
+        // 3xx-5xx responses are not thrown
+        const result = (await response.json()) as {
+          edit?: string
+          error?: string
+        }
+        if (result.error) {
+          core.error(`Failed to update ${wikiPage}: ${result.error}`)
+          core.setFailed('Failed to update one or more pages')
+        } else {
+          if (result.edit === 'successful') {
+            core.info(`Successfully edited ${wikiPage}`)
+          } else {
+            core.info(`No change from edit to ${wikiPage}`)
+          }
+        }
+      } catch (e) {
+        core.error(`Failed to update ${wikiPage}: ${e}`)
+        core.setFailed('Failed to update one or more pages')
+      }
+    })
+  )
 }

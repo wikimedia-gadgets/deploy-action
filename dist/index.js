@@ -51,7 +51,7 @@ async function run() {
         const paths = await processPaths(core.getMultilineInput('paths'));
         const editSummary = core.getInput('editSummary') || `Updating from repo at ${context.ref}`;
         const baseRequestParams = { apiUrl, username, password, OAuth2AccessToken };
-        await Promise.all(requestEdits(baseRequestParams, paths, editSummary));
+        await requestEdits(baseRequestParams, paths, editSummary);
     }
     catch (error) {
         if (error instanceof Error)
@@ -79,7 +79,7 @@ async function processPath(path) {
 }
 exports.processPath = processPath;
 function requestEdits(baseParams, paths, editSummary) {
-    return paths.map(async (path) => {
+    return Promise.all(paths.map(async (path) => {
         let [sourceFile, wikiPage] = path;
         let requestParams = {
             ...baseParams,
@@ -92,28 +92,32 @@ function requestEdits(baseParams, paths, editSummary) {
         for (let [key, val] of Object.entries(requestParams)) {
             formData.append(key, val);
         }
-        const response = await (0, node_fetch_1.default)(`${HOST}/savepage`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'multipart/form-data'
-            },
-            body: formData
-        });
-        // 3xx-5xx responses are not thrown
-        const result = (await response.json());
-        if (result.error) {
-            core.error(`Failed to update ${wikiPage}: ${result.error}`);
-            core.setFailed('Failed to update one or more pages');
-        }
-        else {
-            if (result.edit === 'successful') {
-                core.info(`Successfully edited ${wikiPage}`);
+        core.info(`Syncing ${sourceFile} with ${wikiPage}`);
+        try {
+            const response = await (0, node_fetch_1.default)(`${HOST}/savepage`, {
+                method: 'POST',
+                body: formData
+            });
+            // 3xx-5xx responses are not thrown
+            const result = (await response.json());
+            if (result.error) {
+                core.error(`Failed to update ${wikiPage}: ${result.error}`);
+                core.setFailed('Failed to update one or more pages');
             }
             else {
-                core.info(`No change from edit to ${wikiPage}`);
+                if (result.edit === 'successful') {
+                    core.info(`Successfully edited ${wikiPage}`);
+                }
+                else {
+                    core.info(`No change from edit to ${wikiPage}`);
+                }
             }
         }
-    });
+        catch (e) {
+            core.error(`Failed to update ${wikiPage}: ${e}`);
+            core.setFailed('Failed to update one or more pages');
+        }
+    }));
 }
 exports.requestEdits = requestEdits;
 

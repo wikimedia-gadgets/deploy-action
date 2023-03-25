@@ -2,7 +2,8 @@ import * as process from 'process'
 import * as cp from 'child_process'
 import * as path from 'path'
 import {expect, test} from '@jest/globals'
-import {processPaths} from '../src'
+import {processPaths, requestEdits} from '../src'
+import fs from 'fs/promises'
 
 test('processPaths', async () => {
   const paths = [
@@ -13,6 +14,20 @@ test('processPaths', async () => {
     ['src/GAR-helper.js', 'User:SD0001/GAR-helper.js'],
     ['src/GAN-helper.js', 'User:SD0001/GAN-helper.js']
   ])
+})
+
+test.skip('requestEdits', async () => {
+  const accessToken = (await fs.readFile('./__tests__/.oauth2token.txt'))
+    .toString()
+    .trim()
+  await requestEdits(
+    {
+      apiUrl: 'https://test.wikipedia.org/w/api.php',
+      oauth2Token: accessToken
+    },
+    [['__tests__/sample-script.js', 'User:SDZeroBot/deploy-test.js']],
+    'Updating from ref ____'
+  )
 })
 
 // shows how the runner will run a javascript action with env / stdout protocol
