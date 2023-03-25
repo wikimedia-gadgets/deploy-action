@@ -52,7 +52,7 @@ async function run() {
         const editSummary = core.getInput('editSummary') ||
             `Updating from repo at ${context.ref}`;
         const baseRequestParams = { apiUrl, username, password, OAuth2AccessToken };
-        await requestEdits(baseRequestParams, paths, editSummary);
+        await Promise.all(requestEdits(baseRequestParams, paths, editSummary));
     }
     catch (error) {
         if (error instanceof Error)
@@ -79,7 +79,7 @@ async function processPath(path) {
     // })
 }
 exports.processPath = processPath;
-async function requestEdits(baseParams, paths, editSummary) {
+function requestEdits(baseParams, paths, editSummary) {
     return paths.map(async (path) => {
         let [sourceFile, wikiPage] = path;
         let requestParams = {
@@ -101,7 +101,19 @@ async function requestEdits(baseParams, paths, editSummary) {
             body: formData
         });
         // 3xx-5xx responses are not thrown
-        return response.json();
+        const result = await response.json();
+        if (result.error) {
+            core.error(`Failed to update ${wikiPage}: ${result.error}`);
+            core.setFailed('Failed to update one or more pages');
+        }
+        else {
+            if (result.edit === 'successful') {
+                core.info(`Successfully edited ${wikiPage}`);
+            }
+            else {
+                core.info(`No change from edit to ${wikiPage}`);
+            }
+        }
     });
 }
 exports.requestEdits = requestEdits;
