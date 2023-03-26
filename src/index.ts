@@ -33,8 +33,8 @@ export async function run(): Promise<void> {
     const branch = context.ref.replace(/^refs\/heads/, '')
     const sha = context.sha.slice(0, 8)
     const editSummary = editSummaryRaw
-      .replaceAll(/\$BRANCH/, branch)
-      .replaceAll(/\$SHA/, sha)
+      .replace(/\$BRANCH/, branch)
+      .replace(/\$SHA/, sha)
     core.info(`editSummary: ${editSummary}`)
 
     const baseRequestParams = {apiUrl, username, password, oauth2Token}
