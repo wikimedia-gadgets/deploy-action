@@ -25,9 +25,15 @@ export async function run(): Promise<void> {
     }
 
     const context = github.context
-    const paths = await processPaths(core.getMultilineInput('paths'))
-    const editSummary =
-      core.getInput('editSummary') || `Updating from repo at ${context.ref}`
+    const paths = await processPaths(core.getMultilineInput('paths', {required: true}))
+
+    const editSummaryRaw = core.getInput('editSummary') ||
+      `Updating from repo at $BRANCH ($SHA)`
+    const branch = context.ref.replace(/^refs\/heads/, '')
+    const sha = context.sha.slice(0, 8)
+    const editSummary = editSummaryRaw
+      .replaceAll('$BRANCH', branch)
+      .replaceAll('$SHA', sha)
 
     const baseRequestParams = {apiUrl, username, password, oauth2Token}
 

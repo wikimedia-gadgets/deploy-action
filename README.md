@@ -34,6 +34,11 @@ jobs:
           ### OR ###
           username: ${{ secrets.USERNAME }}
           password: ${{ secrets.PASSWORD }}
+
+          # Optional, defaults to "Updating from repo at $BRANCH ($SHA)"
+          # If provided, $BRANCH will be expanded to branch name, and $SHA to 8-character SHA1
+          # You can also use values from the context (https://docs.github.com/en/actions/learn-github-actions/contexts#github-context)
+          editSummary: ''
 ```
 This action as written above will be triggered every time a commit is pushed to master branch. For alternative trigger mechanisms (such as triggering when a release is published), refer to [GitHub docs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on).
 
