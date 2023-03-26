@@ -1,0 +1,8 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+npm run all
+
+# Stage reformatted files and package
+# XXX: this means any unstaged files also don't staged
+git add src/ dist/

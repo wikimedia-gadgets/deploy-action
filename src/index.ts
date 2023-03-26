@@ -25,10 +25,12 @@ export async function run(): Promise<void> {
     }
 
     const context = github.context
-    const paths = await processPaths(core.getMultilineInput('paths', {required: true}))
+    const paths = await processPaths(
+      core.getMultilineInput('paths', {required: true})
+    )
 
-    const editSummaryRaw = core.getInput('editSummary') ||
-      `Updating from repo at $BRANCH ($SHA)`
+    const editSummaryRaw =
+      core.getInput('editSummary') || `Updating from repo at $BRANCH ($SHA)`
     core.info(`editSummaryRaw: ${editSummaryRaw}`)
     const branch = context.ref.replace(/^refs\/heads/, '')
     const sha = context.sha.slice(0, 8)

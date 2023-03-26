@@ -50,8 +50,15 @@ async function run() {
             return core.setFailed('No authentication credentials specified. Please specify either OAuth (oauth2AccessToken) or the BotPassword (username and password) credentials.');
         }
         const context = github.context;
-        const paths = await processPaths(core.getMultilineInput('paths'));
-        const editSummary = core.getInput('editSummary') || `Updating from repo at ${context.ref}`;
+        const paths = await processPaths(core.getMultilineInput('paths', { required: true }));
+        const editSummaryRaw = core.getInput('editSummary') || `Updating from repo at $BRANCH ($SHA)`;
+        core.info(`editSummaryRaw: ${editSummaryRaw}`);
+        const branch = context.ref.replace(/^refs\/heads/, '');
+        const sha = context.sha.slice(0, 8);
+        const editSummary = editSummaryRaw
+            .replace(/\$BRANCH/, branch)
+            .replace(/\$SHA/, sha);
+        core.info(`editSummary: ${editSummary}`);
         const baseRequestParams = { apiUrl, username, password, oauth2Token };
         await requestEdits(baseRequestParams, paths, editSummary);
     }
