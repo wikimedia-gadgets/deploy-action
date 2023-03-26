@@ -8,11 +8,14 @@ import fs from 'fs/promises'
 test('processPaths', async () => {
   const paths = [
     'src/GAR-helper.js User:SD0001/GAR-helper.js',
-    'src/GAN-helper.js User:SD0001/GAN-helper.js'
+    'src/GAN-helper.js User:SD0001/GAN-helper.js',
+    '__tests__/sample-* User:SD0001/sample-*'
   ]
   expect(await processPaths(paths)).toEqual([
     ['src/GAR-helper.js', 'User:SD0001/GAR-helper.js'],
-    ['src/GAN-helper.js', 'User:SD0001/GAN-helper.js']
+    ['src/GAN-helper.js', 'User:SD0001/GAN-helper.js'],
+    ['__tests__/sample-style.css', 'User:SD0001/sample-style.css'],
+    ['__tests__/sample-script.js', 'User:SD0001/sample-script.js']
   ])
 })
 

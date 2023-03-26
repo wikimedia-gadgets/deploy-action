@@ -3,6 +3,8 @@ import * as github from '@actions/github'
 import fs from 'fs/promises'
 import fetch from 'node-fetch'
 import FormData from 'form-data'
+import glob from 'glob'
+import escapeStringRegexp from 'escape-string-regexp'
 
 const HOST = 'https://sdzerobot.toolforge.org/gitsync'
 
@@ -17,7 +19,7 @@ export async function run(): Promise<void> {
     const usingOAuth = !!oauth2Token
 
     if (!usingBotPassword && !usingOAuth) {
-      core.error(
+      return core.setFailed(
         'No authentication credentials specified. Please specify either OAuth (oauth2AccessToken) or the BotPassword (username and password) credentials.'
       )
     }
@@ -48,14 +50,19 @@ export async function processPath(
   if (path.includes('**')) {
     throw new Error('glob pattern ** is not allowed in paths')
   }
-  if (!path.includes('*')) {
+  if (!source.includes('*')) {
     return [[source, dest]]
   }
-  throw new Error('* pattern not supported at the moment, check back later!')
-  // const files = await glob(source, { ignore: 'node_modules/**' })
-  // const destinations = files.map(file => {
-  //   const globMatch = file.match('*')
-  // })
+  const sourceFiles = await glob(source, {ignore: 'node_modules/**'})
+  const rgx = new RegExp(escapeStringRegexp(source).replace('\\*', '(.*)'))
+  return sourceFiles.map(file => {
+    const matchedPart = file.match(rgx)?.[1]
+    if (matchedPart) {
+      return [file, dest.replace('*', matchedPart)]
+    } else {
+      return [file, dest]
+    }
+  })
 }
 
 export function requestEdits(
@@ -89,8 +96,7 @@ export function requestEdits(
           error?: string
         }
         if (result.error) {
-          core.error(`Failed to update ${wikiPage}: ${result.error}`)
-          core.setFailed('Failed to update one or more pages')
+          core.setFailed(`Failed to update ${wikiPage}: ${result.error}`)
         } else {
           if (result.edit === 'successful') {
             core.info(`Successfully edited ${wikiPage}`)
@@ -99,8 +105,7 @@ export function requestEdits(
           }
         }
       } catch (e) {
-        core.error(`Failed to update ${wikiPage}: ${e}`)
-        core.setFailed('Failed to update one or more pages')
+        core.setFailed(`Failed to update ${wikiPage}: ${e}`)
       }
     })
   )
