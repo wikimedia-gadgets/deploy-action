@@ -49,11 +49,10 @@ async function run() {
         if (!usingBotPassword && !usingOAuth) {
             return core.setFailed('No authentication credentials specified. Please specify either OAuth (oauth2AccessToken) or the BotPassword (username and password) credentials.');
         }
-        const context = github.context;
-        const paths = await processPaths(core.getMultilineInput('paths'));
-        const editSummary = core.getInput('editSummary') || `Updating from repo at ${context.ref}`;
+        const paths = await processPaths(core.getMultilineInput('paths', { required: true }));
+        const editSummaryRaw = core.getInput('editSummary') || 'Updating from repo at $BRANCH ($SHA)';
         const baseRequestParams = { apiUrl, username, password, oauth2Token };
-        await requestEdits(baseRequestParams, paths, editSummary);
+        await requestEdits(baseRequestParams, paths, editSummaryRaw);
     }
     catch (error) {
         if (error instanceof Error)
@@ -86,9 +85,13 @@ async function processPath(path) {
     });
 }
 exports.processPath = processPath;
-function requestEdits(baseParams, paths, editSummary) {
+function requestEdits(baseParams, paths, editSummaryRaw) {
     return Promise.all(paths.map(async (path) => {
         let [sourceFile, wikiPage] = path;
+        const editSummary = editSummaryRaw
+            .replace(/\$BRANCH/, github.context.ref.replace(/^refs\/heads\//, ''))
+            .replace(/\$SHA/, github.context.sha.slice(0, 8))
+            .replace(/\$SOURCE/, sourceFile);
         let requestParams = {
             ...baseParams,
             page: wikiPage,

@@ -3,8 +3,8 @@ description: 'Deploy user scripts or gadgets to Wikimedia sites'
 author: 'Siddharth VP'
 inputs:
   apiUrl:
-    required: true
     description: 'API URL of the wiki, eg. https://en.wikipedia.org/w/api.php'
+    required: true
   username:
     description: 'Username for use with BotPassword authentication'
   password:
@@ -13,8 +13,10 @@ inputs:
     description: 'Access token for use with OAuth2 authentication'
   paths:
     description: 'Paths to sync with wiki pages. Can be multiple lines. Each line should be path-to-file-in-repo <space> wiki-page-title. Note the local file path must not contain spaces.'
+    required: true
   editSummary:
     description: 'Edit summary to use while updating pages'
+    default: 'Updating from repo at $BRANCH ($SHA)'
 runs:
   using: 'node16'
   main: 'dist/index.js'
