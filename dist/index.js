@@ -89,7 +89,7 @@ function requestEdits(baseParams, paths, editSummaryRaw) {
     return Promise.all(paths.map(async (path) => {
         let [sourceFile, wikiPage] = path;
         const editSummary = editSummaryRaw
-            .replace(/\$BRANCH/, github.context.ref.replace(/^refs\/heads/, ''))
+            .replace(/\$BRANCH/, github.context.ref.replace(/^refs\/heads\//, ''))
             .replace(/\$SHA/, github.context.sha.slice(0, 8))
             .replace(/\$SOURCE/, sourceFile);
         let requestParams = {
