@@ -24,24 +24,15 @@ export async function run(): Promise<void> {
       )
     }
 
-    const context = github.context
     const paths = await processPaths(
       core.getMultilineInput('paths', {required: true})
     )
 
     const editSummaryRaw =
-      core.getInput('editSummary') || `Updating from repo at $BRANCH ($SHA)`
-    core.info(`editSummaryRaw: ${editSummaryRaw}`)
-    const branch = context.ref.replace(/^refs\/heads/, '')
-    const sha = context.sha.slice(0, 8)
-    const editSummary = editSummaryRaw
-      .replace(/\$BRANCH/, branch)
-      .replace(/\$SHA/, sha)
-    core.info(`editSummary: ${editSummary}`)
-
+      core.getInput('editSummary') || 'Updating from repo at $BRANCH ($SHA)'
     const baseRequestParams = {apiUrl, username, password, oauth2Token}
 
-    await requestEdits(baseRequestParams, paths, editSummary)
+    await requestEdits(baseRequestParams, paths, editSummaryRaw)
   } catch (error) {
     if (error instanceof Error) core.setFailed(error.message)
   }
@@ -78,11 +69,15 @@ export async function processPath(
 export function requestEdits(
   baseParams: Record<string, string>,
   paths: Array<[string, string]>,
-  editSummary: string
+  editSummaryRaw: string
 ) {
   return Promise.all(
     paths.map(async path => {
       let [sourceFile, wikiPage] = path
+      const editSummary = editSummaryRaw
+        .replace(/\$BRANCH/, github.context.ref.replace(/^refs\/heads/, ''))
+        .replace(/\$SHA/, github.context.sha.slice(0, 8))
+        .replace(/\$SOURCE/, sourceFile)
       let requestParams = {
         ...baseParams,
         page: wikiPage,

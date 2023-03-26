@@ -25,7 +25,8 @@ jobs:
       # Run build and ensure tests are passing before deployment
       - run: npm run --if-present build
       - run: npm run --if-present test
-      - uses: wikimedia-gadgets/deploy-action@v1
+      - name: Deploy to Wikipedia 
+        uses: wikimedia-gadgets/deploy-action@v1
         with:
           paths: 'src/myscript.js User:SD0001/myscript.js'
           apiUrl: 'https://en.wikipedia.org/w/api.php'
@@ -36,8 +37,9 @@ jobs:
           password: ${{ secrets.PASSWORD }}
 
           # Optional, defaults to "Updating from repo at $BRANCH ($SHA)"
-          # If provided, $BRANCH will be expanded to branch name, and $SHA to 8-character SHA1
-          # You can also use values from the context (https://docs.github.com/en/actions/learn-github-actions/contexts#github-context)
+          # If provided, $BRANCH will be expanded to branch name, $SHA to 8-character SHA1, 
+          # $SOURCE to the source file path.
+          # You can also use values from the context (https://docs.github.com/en/actions/learn-github-actions/contexts#github-context) such as ${{github.repository}}
           editSummary: ''
 ```
 This action as written above will be triggered every time a commit is pushed to master branch. For alternative trigger mechanisms (such as triggering when a release is published), refer to [GitHub docs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on).
