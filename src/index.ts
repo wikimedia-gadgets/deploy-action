@@ -29,11 +29,13 @@ export async function run(): Promise<void> {
 
     const editSummaryRaw = core.getInput('editSummary') ||
       `Updating from repo at $BRANCH ($SHA)`
+    core.info(`editSummaryRaw: ${editSummaryRaw}`)
     const branch = context.ref.replace(/^refs\/heads/, '')
     const sha = context.sha.slice(0, 8)
     const editSummary = editSummaryRaw
       .replaceAll('$BRANCH', branch)
       .replaceAll('$SHA', sha)
+    core.info(`editSummary: ${editSummary}`)
 
     const baseRequestParams = {apiUrl, username, password, oauth2Token}
 
