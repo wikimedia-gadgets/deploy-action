@@ -3,7 +3,7 @@
 GitHub Action to automate user script and gadget deployments to Wikimedia wikis.
 
 ## Usage
-* Setup either a [BotPassword](https://en.wikipedia.org/wiki/Special:BotPasswords) or an [owner-only OAuth2 credentials](https://meta.wikimedia.org/wiki/Special:OAuthConsumerRegistration/propose/oauth2?wpownerOnly=1) for your user account, which will get used for updating the script pages.
+* Setup either a [BotPassword](https://en.wikipedia.org/wiki/Special:BotPasswords) or an [owner-only OAuth2 credential](https://meta.wikimedia.org/wiki/Special:OAuthConsumerRegistration/propose/oauth2?wpownerOnly=1) for your user account, which will get used for updating the script pages.
   * Make sure the grant to allow editing your user CSS/JSON/JavaScript is checked.
 * [Save the credentials](https://docs.github.com/en/actions/security-guides/encrypted-secrets#creating-encrypted-secrets-for-a-repository) to GitHub Secrets in your repo (either the OAUTH2_TOKEN, or the USERNAME and PASSWORD). 
 
@@ -39,7 +39,8 @@ jobs:
           # Optional, defaults to "Updating from repo at $BRANCH ($SHA)"
           # If provided, $BRANCH will be expanded to branch name, $SHA to 8-character SHA1, 
           # and $SOURCE to the source file path.
-          # You can also use values from the context (https://docs.github.com/en/actions/learn-github-actions/contexts#github-context) such as ${{github.repository}}
+          # You can also use values from the context (https://docs.github.com/en/actions/learn-github-actions/contexts#github-context) 
+          # such as ${{github.repository}} or ${{github.actor}}
           editSummary: ''
 ```
 This action as written above will be triggered every time a commit is pushed to master branch. For alternative trigger mechanisms (such as triggering when a release is published), refer to [GitHub docs](https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#on).
